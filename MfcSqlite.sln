@@ -1,0 +1,33 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibSQLLite", "LibSQLLite\LibSQLLite.vcxproj", "{86E4B3D8-5B00-4724-B031-1FCC844CE1F7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MfcSqliteApp", "MfcSqliteApp\MfcSqliteApp.vcxproj", "{A1B2C3D4-E5F6-47A8-9B0C-1D2E3F4A5B6C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{86E4B3D8-5B00-4724-B031-1FCC844CE1F7} = {86E4B3D8-5B00-4724-B031-1FCC844CE1F7}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{86E4B3D8-5B00-4724-B031-1FCC844CE1F7}.Debug|x64.ActiveCfg = Debug|x64
+		{86E4B3D8-5B00-4724-B031-1FCC844CE1F7}.Debug|x64.Build.0 = Debug|x64
+		{86E4B3D8-5B00-4724-B031-1FCC844CE1F7}.Release|x64.ActiveCfg = Release|x64
+		{86E4B3D8-5B00-4724-B031-1FCC844CE1F7}.Release|x64.Build.0 = Release|x64
+		{A1B2C3D4-E5F6-47A8-9B0C-1D2E3F4A5B6C}.Debug|x64.ActiveCfg = Debug|x64
+		{A1B2C3D4-E5F6-47A8-9B0C-1D2E3F4A5B6C}.Debug|x64.Build.0 = Debug|x64
+		{A1B2C3D4-E5F6-47A8-9B0C-1D2E3F4A5B6C}.Release|x64.ActiveCfg = Release|x64
+		{A1B2C3D4-E5F6-47A8-9B0C-1D2E3F4A5B6C}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C82E2510-848B-4C37-91CB-3556AD4B3B7C}
+	EndGlobalSection
+EndGlobal
