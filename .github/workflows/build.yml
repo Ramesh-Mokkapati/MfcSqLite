@@ -13,10 +13,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v5
 
       - name: Set up MSBuild
-        uses: microsoft/setup-msbuild@v2.0.0
+        uses: microsoft/setup-msbuild@v3
 
       - name: Build Debug
         run: >
@@ -45,7 +45,7 @@ jobs:
           Compress-Archive -Path dist\* -DestinationPath MfcSqliteApp-x64.zip
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v7
         with:
           name: MfcSqliteApp-x64
           path: MfcSqliteApp-x64.zip
