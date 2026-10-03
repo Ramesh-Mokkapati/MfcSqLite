@@ -8,33 +8,45 @@ on:
 
 jobs:
   build:
-    name: MSBuild ${{ matrix.configuration }} x64
+    name: Build x64
     runs-on: windows-2022
-
-    strategy:
-      matrix:
-        configuration: [Debug, Release]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Set up MSBuild
-        uses: microsoft/setup-msbuild@v2
+        uses: microsoft/setup-msbuild@v2.0.0
 
-      - name: Build
+      - name: Build Debug
         run: >
           msbuild MfcSqlite.sln
-          /p:Configuration=${{ matrix.configuration }}
+          /p:Configuration=Debug
           /p:Platform=x64
           /m
           /nologo
           /verbosity:minimal
 
+      - name: Build Release
+        run: >
+          msbuild MfcSqlite.sln
+          /p:Configuration=Release
+          /p:Platform=x64
+          /m
+          /nologo
+          /verbosity:minimal
+
+      - name: Package binaries
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Copy-Item x64\Debug\MfcSqliteApp.exe   dist\MfcSqliteApp_Debug.exe
+          Copy-Item x64\Release\MfcSqliteApp.exe dist\MfcSqliteApp_Release.exe
+          Compress-Archive -Path dist\* -DestinationPath MfcSqliteApp-x64.zip
+
       - name: Upload artifact
-        if: matrix.configuration == 'Release'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
-          name: MfcSqliteApp-x64-Release
-          path: x64\Release\MfcSqliteApp.exe
+          name: MfcSqliteApp-x64
+          path: MfcSqliteApp-x64.zip
           if-no-files-found: error
