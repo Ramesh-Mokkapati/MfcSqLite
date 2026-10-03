@@ -22,6 +22,21 @@ jobs:
       - name: Set up MSBuild
         uses: microsoft/setup-msbuild@v2
 
+      - name: Install MFC
+        shell: pwsh
+        run: |
+          $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\setup.exe"
+          $vswhere   = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vsPath    = (& $vswhere -latest -products * -property installationPath).Trim()
+          Write-Host "Installing MFC into: $vsPath"
+          $proc = Start-Process -FilePath $installer `
+            -ArgumentList "modify --installPath `"$vsPath`" --add Microsoft.VisualStudio.Component.VC.ATLMFC --quiet --norestart" `
+            -Wait -PassThru
+          if ($proc.ExitCode -ne 0 -and $proc.ExitCode -ne 3010) {
+            throw "Installer returned $($proc.ExitCode)"
+          }
+          Write-Host "Done (exit $($proc.ExitCode))"
+
       - name: Build
         run: >
           msbuild MfcSqlite.sln
