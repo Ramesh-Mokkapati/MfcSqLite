@@ -22,15 +22,6 @@ jobs:
       - name: Set up MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Install MFC
-        shell: cmd
-        run: |
-          "%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\setup.exe" modify ^
-            --installPath "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise" ^
-            --add Microsoft.VisualStudio.Component.VC.ATLMFC ^
-            --quiet --norestart --force --wait
-          if %ERRORLEVEL% neq 0 if %ERRORLEVEL% neq 3010 exit /b %ERRORLEVEL%
-
       - name: Build
         run: >
           msbuild MfcSqlite.sln
