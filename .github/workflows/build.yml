@@ -1,0 +1,57 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: MSBuild ${{ matrix.configuration }} x64
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      # sqlite3.c / sqlite3.h are stub files — download the real amalgamation
+      # from sqlite.org and overwrite them before the build.
+      - name: Download SQLite amalgamation
+        shell: pwsh
+        run: |
+          $page  = Invoke-WebRequest -Uri 'https://www.sqlite.org/download.html' -UseBasicParsing
+          $match = [regex]::Match($page.Content, 'href="(\d{4}/sqlite-amalgamation-\d+\.zip)"')
+          if (-not $match.Success) { throw 'Could not find amalgamation link on sqlite.org/download.html' }
+          $url  = "https://www.sqlite.org/$($match.Groups[1].Value)"
+          Write-Host "Downloading $url"
+          Invoke-WebRequest -Uri $url -OutFile sqlite-amalgamation.zip -UseBasicParsing
+          Expand-Archive -Path sqlite-amalgamation.zip -DestinationPath sqlite-amalgamation
+          $srcDir = (Get-ChildItem -Path sqlite-amalgamation -Directory | Select-Object -First 1).FullName
+          Copy-Item "$srcDir\sqlite3.c" -Destination "LibSQLLite\sqlite3.c" -Force
+          Copy-Item "$srcDir\sqlite3.h" -Destination "LibSQLLite\sqlite3.h" -Force
+          Write-Host "SQLite amalgamation installed."
+
+      - name: Build
+        run: >
+          msbuild MfcSqlite.sln
+          /p:Configuration=${{ matrix.configuration }}
+          /p:Platform=x64
+          /m
+          /nologo
+          /verbosity:minimal
+
+      - name: Upload artifact
+        if: matrix.configuration == 'Release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: MfcSqliteApp-x64-Release
+          path: x64\Release\MfcSqliteApp.exe
+          if-no-files-found: error
