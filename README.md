@@ -7,14 +7,6 @@ A Visual Studio 2022 demo project showing how to integrate SQLite into an MFC ap
 - Visual Studio 2022 (Community or Professional)
 - Windows 10 or later
 
-## SQLite Setup (Required Before Building)
-
-The `sqlite3.c` and `sqlite3.h` files included in `LibSQLLite\` are empty stubs. You must replace them before the project will compile:
-
-1. Go to [https://sqlite.org/download.html](https://sqlite.org/download.html)
-2. Download the **sqlite-amalgamation-\*.zip** source package
-3. Extract `sqlite3.c` and `sqlite3.h` from the zip and overwrite the stubs in `LibSQLLite\`
-
 ## Building
 
 Open `MfcSqlite.sln` in Visual Studio 2022 and build the solution (Debug or Release). Both projects build as x64 by default.
@@ -30,8 +22,8 @@ MfcSqlite.sln
 ├── LibSQLLite\               — Static library: ORM types + DatabaseContext
 │   ├── LibSQLLite.h          — SqliteRepository<T>, TableSchema<T>, DatabaseContext
 │   ├── LibSQLLite.cpp        — DatabaseContext::Open / Close implementation
-│   ├── sqlite3.h             — SQLite amalgamation header (stub — replace before building)
-│   └── sqlite3.c             — SQLite amalgamation source  (stub — replace before building)
+│   ├── sqlite3.h             — SQLite amalgamation header
+│   └── sqlite3.c             — SQLite amalgamation source
 ├── MfcSqliteApp\             — Demo MFC dialog application
 │   └── main.cpp              — Profile + AuditLog schemas, CMainGridDialog, CMfcSqliteApp
 └── migrate_mysql_to_sqlite.py — Standalone utility: migrate a MySQL schema to SQLite
