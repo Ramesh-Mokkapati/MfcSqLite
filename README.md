@@ -94,7 +94,7 @@ python migrate_mysql_to_sqlite.py \
   --user root \
   --password root \
   --db my_schema \
-  --sqlite C:\VDL\vdl.db
+  --sqlite C:\my.db
 ```
 
 If `--db` is omitted the script lists all non-system schemas from MySQL and asks you to pick one interactively.
@@ -108,7 +108,7 @@ If `--db` is omitted the script lists all non-system schemas from MySQL and asks
 | `--user` | `root` | MySQL username |
 | `--password` | `root` | MySQL password |
 | `--db` | _(interactive)_ | MySQL schema to migrate; omit to choose from a list |
-| `--sqlite` | `C:\VDL\vdl.db` | Destination SQLite file path (created if it does not exist) |
+| `--sqlite` | `C:\my.db` | Destination SQLite file path (created if it does not exist) |
 
 ### Type mapping
 
