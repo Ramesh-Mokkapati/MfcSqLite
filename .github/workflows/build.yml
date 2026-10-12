@@ -98,13 +98,15 @@ jobs:
       # Every exe/DLL must load on a clean machine: no Debug C++ runtime (not
       # redistributable), and every DLL it imports is either next to it in the
       # package, a standard Windows DLL, or part of the VC++ 2015-2022 runtime
-      # (incl. MFC) that the ComponentSuite installer requires.
+      # (incl. MFC) that the ComponentSuite installer requires. winspool.drv is
+      # Windows' print spooler (imported by MFC apps), the one system import
+      # that isn't a .dll.
       - name: Check runtime dependencies
         env:
           PKG: package
         run: |
           command -v objdump > /dev/null || { echo "::error::objdump not found, so the dependency check cannot run"; exit 1; }
-          allowed='^(kernel32|kernelbase|ntdll|user32|gdi32|gdiplus|advapi32|shell32|shlwapi|ole32|oleaut32|oleacc|oledlg|comctl32|comdlg32|uxtheme|dwmapi|imm32|msimg32|winmm|version|setupapi|cfgmgr32|rstrtmgr|virtdisk|ws2_32|mswsock|iphlpapi|netapi32|dnsapi|winhttp|wininet|urlmon|webservices|crypt32|bcrypt|ncrypt|secur32|wintrust|rpcrt4|userenv|psapi|dbghelp|wtsapi32|powrprof|propsys|normaliz|wldap32|msvcrt|api-ms-win-[a-z0-9-]+|ext-ms-win-[a-z0-9-]+|msvcp140(_1|_2|_atomic_wait|_codecvt_ids)?|vcruntime140(_1)?|concrt140|vcomp140|mfc140u?|mfcm140u?|ucrtbase)\.dll$'
+          allowed='^((kernel32|kernelbase|ntdll|user32|gdi32|gdiplus|advapi32|shell32|shlwapi|ole32|oleaut32|oleacc|oledlg|comctl32|comdlg32|uxtheme|dwmapi|imm32|msimg32|winmm|version|setupapi|cfgmgr32|rstrtmgr|virtdisk|ws2_32|mswsock|iphlpapi|netapi32|dnsapi|winhttp|wininet|urlmon|webservices|crypt32|bcrypt|ncrypt|secur32|wintrust|rpcrt4|userenv|psapi|dbghelp|wtsapi32|powrprof|propsys|normaliz|wldap32|msvcrt|api-ms-win-[a-z0-9-]+|ext-ms-win-[a-z0-9-]+|msvcp140(_1|_2|_atomic_wait|_codecvt_ids)?|vcruntime140(_1)?|concrt140|vcomp140|mfc140u?|mfcm140u?|ucrtbase)\.dll|winspool\.drv)$'
           debugcrt='^(msvcp140d|msvcp140_1d|msvcp140_2d|vcruntime140d|vcruntime140_1d|concrt140d|ucrtbased|mfc140u?d|mfcm140u?d)\.dll$'
           fail=0; checked=0
           while IFS= read -r -d '' f; do
