@@ -108,7 +108,7 @@ If `--db` is omitted the script lists all non-system schemas from MySQL and asks
 | `--user` | `root` | MySQL username |
 | `--password` | `root` | MySQL password |
 | `--db` | _(interactive)_ | MySQL schema to migrate; omit to choose from a list |
-| `--sqlite` | `C:\my.db` | Destination SQLite file path (created if it does not exist) |
+| `--sqlite` | `my.db` | Destination SQLite file path (created if it does not exist); a relative path is resolved against the current folder |
 
 ### Type mapping
 

@@ -3,6 +3,7 @@ name: Build
 on:
   push:
     branches: [main]
+    tags: ["v*.*.*"]
   pull_request:
     branches: [main]
 
@@ -50,3 +51,39 @@ jobs:
           name: MfcSqliteApp-x64
           path: MfcSqliteApp-x64.zip
           if-no-files-found: error
+
+  # On a v*.*.* tag, publish the Release build as a GitHub Release
+  # (MfcSqLite-<tag>-x64.zip containing MfcSqliteApp.exe). The app links MFC
+  # and the CRT statically, so the exe is all that's needed to run it.
+  release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write   # required to create / update a GitHub Release
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: MfcSqliteApp-x64
+          path: artifact
+
+      # The artifact wraps MfcSqliteApp-x64.zip (Debug + Release exes); keep only Release.
+      - name: Zip package
+        run: |
+          unzip -q artifact/MfcSqliteApp-x64.zip -d unpacked
+          mkdir package
+          cp unpacked/MfcSqliteApp_Release.exe package/MfcSqliteApp.exe
+          cd package
+          zip "../MfcSqLite-${{ github.ref_name }}-x64.zip" MfcSqliteApp.exe
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: MfcSqLite-${{ github.ref_name }}-x64.zip
+          generate_release_notes: true   # auto-generates notes from merged PRs / commits
+          # v1.2.0-rc1 etc. become pre-releases, so they never count as the "latest" release
+          # that downstream packaging (the ComponentSuite installer) picks up.
+          prerelease: ${{ contains(github.ref_name, '-') }}

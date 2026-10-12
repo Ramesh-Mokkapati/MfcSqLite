@@ -2,3 +2,12 @@
 *.user
 */x64/
 x64/
+
+# Python bytecode (migrate_mysql_to_sqlite.py)
+__pycache__/
+*.py[cod]
+
+# SQLite databases created by the app or the migration script (+ WAL side files)
+*.db
+*.db-wal
+*.db-shm

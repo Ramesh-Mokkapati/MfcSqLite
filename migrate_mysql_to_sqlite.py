@@ -6,9 +6,8 @@ Usage:
     python migrate_mysql_to_sqlite.py [--host 127.0.0.1]
                                       [--user root] [--password root]
                                       [--db <schema>]   # omit to get an interactive list
-                                      [--sqlite C:\\VDL\\vdl.db]
+                                      [--sqlite my.db]  # default: my.db in the current folder
 
-Defaults match the VDL product configuration.
 If --db is omitted the script lists all non-system schemas from MySQL and
 asks you to choose one interactively.
 """
@@ -115,7 +114,7 @@ def migrate(mysql_cfg: dict, sqlite_path: str, mysql_db: str):
     )
     my_cur = my_conn.cursor(dictionary=True)
 
-    print(f"Opening SQLite       : {sqlite_path}")
+    print(f"Opening SQLite       : {os.path.abspath(sqlite_path)}")
     sq_conn = sqlite3.connect(sqlite_path)
     sq_conn.execute("PRAGMA journal_mode=WAL;")
     sq_conn.execute("PRAGMA synchronous=NORMAL;")
@@ -207,7 +206,7 @@ def migrate(mysql_cfg: dict, sqlite_path: str, mysql_db: str):
     my_cur.close()
     my_conn.close()
 
-    print(f"\nDone. {len(tables)} table(s), {total_rows} row(s) written to {sqlite_path}")
+    print(f"\nDone. {len(tables)} table(s), {total_rows} row(s) written to {os.path.abspath(sqlite_path)}")
 
 
 def list_user_schemas(mysql_cfg: dict) -> list:
@@ -273,7 +272,7 @@ def main():
     parser.add_argument("--user",     default="root")
     parser.add_argument("--password", default="root")
     parser.add_argument("--db",       default="",             help="MySQL schema name (omit to choose interactively)")
-    parser.add_argument("--sqlite",   default=r"C:\VDL\vdl.db", help="Destination SQLite file")
+    parser.add_argument("--sqlite",   default="my.db",          help="Destination SQLite file (default: my.db in the current folder)")
     args = parser.parse_args()
 
     mysql_cfg = {
