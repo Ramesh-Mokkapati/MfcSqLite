@@ -59,11 +59,27 @@ jobs:
     name: Publish GitHub Release
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    # Every successful push to the default branch is released automatically
+    # (tag v<VERSION_PREFIX>.<run number> is created); pushing a v*.*.* tag
+    # yourself releases exactly that tag. Pull requests never release.
+    if: >-
+      github.event_name == 'push' &&
+      (startsWith(github.ref, 'refs/tags/v') ||
+       github.ref == format('refs/heads/{0}', github.event.repository.default_branch))
+    env:
+      VERSION_PREFIX: "1.1"   # major.minor of automatic versions
     permissions:
       contents: write   # required to create / update a GitHub Release
 
     steps:
+      - name: Work out release tag
+        id: tag
+        run: |
+          if [ "${{ github.ref_type }}" = tag ]; then tag="${{ github.ref_name }}"
+          else tag="v${VERSION_PREFIX}.${{ github.run_number }}"; fi
+          echo "Release tag: $tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
       - name: Download artifact
         uses: actions/download-artifact@v8
         with:
@@ -77,12 +93,40 @@ jobs:
           mkdir package
           cp unpacked/MfcSqliteApp_Release.exe package/MfcSqliteApp.exe
           cd package
-          zip "../MfcSqLite-${{ github.ref_name }}-x64.zip" MfcSqliteApp.exe
+          zip "../MfcSqLite-${{ steps.tag.outputs.tag }}-x64.zip" MfcSqliteApp.exe
+
+      # Every exe/DLL must load on a clean machine: no Debug C++ runtime (not
+      # redistributable), and every DLL it imports is either next to it in the
+      # package, a standard Windows DLL, or part of the VC++ 2015-2022 runtime
+      # (incl. MFC) that the ComponentSuite installer requires.
+      - name: Check runtime dependencies
+        env:
+          PKG: package
+        run: |
+          command -v objdump > /dev/null || { echo "::error::objdump not found, so the dependency check cannot run"; exit 1; }
+          allowed='^(kernel32|kernelbase|ntdll|user32|gdi32|gdiplus|advapi32|shell32|shlwapi|ole32|oleaut32|oleacc|oledlg|comctl32|comdlg32|uxtheme|dwmapi|imm32|msimg32|winmm|version|setupapi|cfgmgr32|rstrtmgr|virtdisk|ws2_32|mswsock|iphlpapi|netapi32|dnsapi|winhttp|wininet|urlmon|webservices|crypt32|bcrypt|ncrypt|secur32|wintrust|rpcrt4|userenv|psapi|dbghelp|wtsapi32|powrprof|propsys|normaliz|wldap32|msvcrt|api-ms-win-[a-z0-9-]+|ext-ms-win-[a-z0-9-]+|msvcp140(_1|_2|_atomic_wait|_codecvt_ids)?|vcruntime140(_1)?|concrt140|vcomp140|mfc140u?|mfcm140u?|ucrtbase)\.dll$'
+          debugcrt='^(msvcp140d|msvcp140_1d|msvcp140_2d|vcruntime140d|vcruntime140_1d|concrt140d|ucrtbased|mfc140u?d|mfcm140u?d)\.dll$'
+          fail=0; checked=0
+          while IFS= read -r -d '' f; do
+            checked=$((checked + 1)); dir=$(dirname "$f"); name=${f#"$PKG"/}
+            for dep in $(objdump -p "$f" | sed -n 's/^[[:space:]]*DLL Name: //p' | tr 'A-Z' 'a-z'); do
+              if [[ $dep =~ $debugcrt ]]; then
+                echo "::error::$name needs the Debug C++ runtime ($dep), which isn't redistributable"; fail=1
+              elif [ -z "$(find "$dir" -maxdepth 1 -iname "$dep" -print -quit)" ] && ! [[ $dep =~ $allowed ]]; then
+                echo "::error::$name needs $dep, which isn't in the package"; fail=1
+              fi
+            done
+          done < <(find "$PKG" -type f \( -iname '*.exe' -o -iname '*.dll' \) -print0)
+          [ "$checked" -gt 0 ] || { echo "::error::no .exe/.dll files found in $PKG"; exit 1; }
+          echo "Checked $checked binaries"
+          exit $fail
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: MfcSqLite-${{ github.ref_name }}-x64.zip
+          tag_name: ${{ steps.tag.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          files: MfcSqLite-${{ steps.tag.outputs.tag }}-x64.zip
           generate_release_notes: true   # auto-generates notes from merged PRs / commits
           # v1.2.0-rc1 etc. become pre-releases, so they never count as the "latest" release
           # that downstream packaging (the ComponentSuite installer) picks up.
