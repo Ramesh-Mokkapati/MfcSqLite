@@ -2,6 +2,12 @@
 
 A Visual Studio 2022 demo project showing how to integrate SQLite into an MFC application using a generic, template-based ORM. The project is split into two components: a reusable library (`LibSQLLite`) and a demo MFC dialog app (`MfcSqliteApp`).
 
+## Screenshot
+
+Five profiles added with **Insert**, then one selected in the grid, which loads its Name and Engine into the fields for **Update Selected**:
+
+![MfcSqliteApp with the Name and Engine fields, the action buttons, and the Profiles grid showing ID, Name, Engine, Rating and Avatar size columns](docs/screenshots/main-window.png)
+
 ## Prerequisites
 
 - Visual Studio 2022 (Community or Professional)

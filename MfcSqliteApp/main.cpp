@@ -196,6 +196,7 @@ protected:
     CButton   m_BtnRefresh, m_BtnInsert, m_BtnUpdate, m_BtnDelete, m_BtnClear;
     CEdit     m_EditName, m_EditEngine;
     CStatic   m_StaticName, m_StaticEngine, m_StaticStatus;
+    CFont     m_UiFont;
 
     DatabaseContext           m_DbContext;
     SqliteRepository<Profile>  m_ProfileRepo;
@@ -207,31 +208,46 @@ protected:
     {
         CDialog::OnInitDialog();
 
+        // The layout below is in 96-DPI pixels; S() scales it to the window's DPI.
+        const int dpi = static_cast<int>(GetDpiForWindow(m_hWnd));
+        auto S = [dpi](int v) { return MulDiv(v, dpi, 96); };
+        auto R = [&S](int l, int t, int r, int b) { return CRect(S(l), S(t), S(r), S(b)); };
+
         SetWindowText(_T("MFC Generic SQLite ORM (Supports ALL SQLite Datatypes)"));
-        SetWindowPos(NULL, 0, 0, 650, 500, SWP_NOMOVE | SWP_NOZORDER);
+        SetWindowPos(NULL, 0, 0, S(650), S(500), SWP_NOMOVE | SWP_NOZORDER);
 
         // UI Initialization
-        m_StaticName.Create(_T("Name:"), WS_CHILD | WS_VISIBLE, CRect(20, 18, 65, 34), this, IDC_STATIC_NAME);
-        m_EditName.Create(WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, CRect(70, 15, 290, 36), this, IDC_EDIT_NAME);
-        m_StaticEngine.Create(_T("Engine:"), WS_CHILD | WS_VISIBLE, CRect(300, 18, 350, 34), this, IDC_STATIC_ENGINE);
-        m_EditEngine.Create(WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, CRect(355, 15, 610, 36), this, IDC_EDIT_ENGINE);
+        m_StaticName.Create(_T("Name:"), WS_CHILD | WS_VISIBLE, R(20, 18, 65, 34), this, IDC_STATIC_NAME);
+        m_EditName.Create(WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, R(70, 15, 290, 36), this, IDC_EDIT_NAME);
+        m_StaticEngine.Create(_T("Engine:"), WS_CHILD | WS_VISIBLE, R(300, 18, 352, 34), this, IDC_STATIC_ENGINE);
+        m_EditEngine.Create(WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, R(357, 15, 610, 36), this, IDC_EDIT_ENGINE);
 
-        m_BtnInsert.Create(_T("Insert"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, CRect(20, 50, 130, 82), this, IDC_BTN_INSERT);
-        m_BtnUpdate.Create(_T("Update Selected"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, CRect(140, 50, 270, 82), this, IDC_BTN_UPDATE);
-        m_BtnDelete.Create(_T("Delete Selected"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, CRect(280, 50, 410, 82), this, IDC_BTN_DELETE);
-        m_BtnClear.Create(_T("Clear Fields"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, CRect(420, 50, 530, 82), this, IDC_BTN_CLEAR);
-        m_BtnRefresh.Create(_T("Refresh Grid"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, CRect(540, 50, 610, 82), this, IDC_BTN_REFRESH);
+        m_BtnInsert.Create(_T("Insert"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, R(20, 50, 120, 82), this, IDC_BTN_INSERT);
+        m_BtnUpdate.Create(_T("Update Selected"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, R(130, 50, 250, 82), this, IDC_BTN_UPDATE);
+        m_BtnDelete.Create(_T("Delete Selected"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, R(260, 50, 380, 82), this, IDC_BTN_DELETE);
+        m_BtnClear.Create(_T("Clear Fields"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, R(390, 50, 495, 82), this, IDC_BTN_CLEAR);
+        m_BtnRefresh.Create(_T("Refresh Grid"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, R(505, 50, 610, 82), this, IDC_BTN_REFRESH);
 
-        m_GridCtrl.Create(WS_CHILD | WS_VISIBLE | WS_BORDER | LVS_REPORT, CRect(20, 92, 610, 400), this, IDC_GRID);
+        m_GridCtrl.Create(WS_CHILD | WS_VISIBLE | WS_BORDER | LVS_REPORT, R(20, 92, 610, 400), this, IDC_GRID);
         m_GridCtrl.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
-        m_GridCtrl.InsertColumn(0, _T("ID (INT64)"), LVCFMT_LEFT, 80);
-        m_GridCtrl.InsertColumn(1, _T("Name (TEXT)"), LVCFMT_LEFT, 180);
-        m_GridCtrl.InsertColumn(2, _T("Engine (TEXT)"), LVCFMT_LEFT, 150);
-        m_GridCtrl.InsertColumn(3, _T("Rating (REAL)"), LVCFMT_LEFT, 90);
-        m_GridCtrl.InsertColumn(4, _T("Avatar Size (BLOB)"), LVCFMT_LEFT, 110);
+        // Column widths add up to the grid's inner width, so there is no horizontal scroll bar.
+        m_GridCtrl.InsertColumn(0, _T("ID (INT64)"), LVCFMT_LEFT, S(70));
+        m_GridCtrl.InsertColumn(1, _T("Name (TEXT)"), LVCFMT_LEFT, S(165));
+        m_GridCtrl.InsertColumn(2, _T("Engine (TEXT)"), LVCFMT_LEFT, S(150));
+        m_GridCtrl.InsertColumn(3, _T("Rating (REAL)"), LVCFMT_LEFT, S(90));
+        m_GridCtrl.InsertColumn(4, _T("Avatar Size (BLOB)"), LVCFMT_LEFT, S(110));
 
-        m_StaticStatus.Create(_T("Ready."), WS_CHILD | WS_VISIBLE | SS_LEFT, CRect(20, 410, 610, 430), this, IDC_STATIC_STATUS);
+        m_StaticStatus.Create(_T("Ready."), WS_CHILD | WS_VISIBLE | SS_LEFT, R(20, 410, 610, 430), this, IDC_STATIC_STATUS);
+
+        // The in-memory dialog template has no DS_SETFONT, so without this every control would use the
+        // bold System font, which doesn't fit the layout. Use the Windows UI font at this window's DPI.
+        NONCLIENTMETRICS ncm = { sizeof(ncm) };
+        if (SystemParametersInfoForDpi(SPI_GETNONCLIENTMETRICS, sizeof(ncm), &ncm, 0, dpi) &&
+            m_UiFont.CreateFontIndirect(&ncm.lfMessageFont))
+        {
+            SendMessageToDescendants(WM_SETFONT, reinterpret_cast<WPARAM>(m_UiFont.GetSafeHandle()), TRUE);
+        }
 
         // Compute Database Path
         TCHAR modulePath[MAX_PATH] = {};
