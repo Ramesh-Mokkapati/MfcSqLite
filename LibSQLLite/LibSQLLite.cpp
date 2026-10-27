@@ -53,6 +53,7 @@ bool DatabaseContext::Open(const CString& dbPath, CString& outErrMsg)
         {
             outErrMsg += _T("(sqlite3_open returned success but did not provide a DB handle.)");
         }
+
         return false;
     }
 

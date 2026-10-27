@@ -4,9 +4,9 @@ A Visual Studio 2022 demo project showing how to integrate SQLite into an MFC ap
 
 ## Screenshot
 
-Five profiles added with **Insert**, then one selected in the grid, which loads its Name and Engine into the fields for **Update Selected**:
+A profile selected in the grid loads its Name, Engine and Rating into the fields for **Update Selected**, and its Avatar BLOB is decoded and shown in the preview pane. Here no image was uploaded, so the app generated a random one:
 
-![MfcSqliteApp with the Name and Engine fields, the action buttons, and the Profiles grid showing ID, Name, Engine, Rating and Avatar size columns](docs/screenshots/main-window.png)
+![MfcSqliteApp with the Name, Engine and Rating fields, the action buttons, the Profiles grid with one selected row, and the Avatar preview pane showing a randomly generated image with Upload Image and Use Random buttons below it](docs/screenshots/main-window.png)
 
 ## Prerequisites
 
@@ -63,14 +63,16 @@ The database file (`mfc_app_multitable.db`) is created in the same directory as 
 
 ## Usage
 
-Run the compiled executable. The dialog opens with a grid and four action buttons:
+Run the compiled executable. The dialog opens with a grid, an Avatar preview pane, and action buttons. Selecting a row decodes its Avatar BLOB and shows the image in the preview pane.
 
 | Button | Behaviour |
 |---|---|
-| **Insert** | Creates a new Profile row from the Name/Engine fields (Rating and Avatar populated with demo values) |
-| **Update Selected** | Overwrites the selected row's fields |
+| **Insert** | Creates a new Profile row from the Name, Engine and Rating fields (Rating must be a number; empty means 0. Avatar is the uploaded image, or a randomly generated PNG if none was uploaded) |
+| **Update Selected** | Overwrites the selected row's fields and replaces its Avatar with the uploaded image, or a new random image if none was uploaded |
 | **Delete Selected** | Deletes the selected row after confirmation |
 | **Refresh Grid** | Reloads all rows from the database |
+| **Upload Image...** | Picks a PNG, JPEG, BMP or GIF file (up to 10 MB) to store as the Avatar on the next Insert or Update; the preview shows it until it is saved |
+| **Use Random** | Discards the uploaded image so the next Insert or Update generates a random one |
 | **Clear Fields** | Clears the input fields and deselects the grid row |
 
 ---
